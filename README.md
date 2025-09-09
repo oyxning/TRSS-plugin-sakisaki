@@ -18,7 +18,7 @@
 ### 方法1：直接安装
 ```bash
 cd TRSS-Yunzai/plugins
-git clone https://github.com/yourname/sakisaki-game-plugin.git
+git clone https://github.com/oyxning/sakisaki-game-plugin.git
 ```
 
 ### 方法2：手动安装
@@ -153,7 +153,7 @@ sakisaki-game-plugin/
 
 ### 开发环境
 ```bash
-git clone https://github.com/yourname/sakisaki-game-plugin.git
+git clone https://github.com/oyxning/sakisaki-game-plugin.git
 cd sakisaki-game-plugin
 npm install
 ```

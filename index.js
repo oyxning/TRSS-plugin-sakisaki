@@ -4,19 +4,16 @@ import path from 'path'
 import { createRequire } from 'module'
 const require = createRequire(import.meta.url)
 
-// 数据存储路径
 const DATA_DIR = './data/sakisaki-game'
 const DATA_FILE = path.join(DATA_DIR, 'sakisaki_data.json')
 const IMAGE_FILE = path.join(DATA_DIR, 'sjp.jpg')
 const IMAGE_URL = 'https://raw.githubusercontent.com/oyxning/astrbot_plugin_sakisaki/refs/heads/master/sjp.jpg'
 
-// 确保数据目录存在
 await fs.ensureDir(DATA_DIR)
 
-// 香草小祥追击游戏插件
 const plugin = {
   name: 'sakisaki-game-plugin',
-  dsc: '香草小祥追击游戏 - 移植自AstrBot版本',
+  dsc: '香草小祥追击游戏',
   event: 'message',
   priority: 5000,
   rule: [
@@ -43,7 +40,6 @@ const plugin = {
   ]
 }
 
-// 初始化数据
 async function initData() {
   if (!await fs.pathExists(DATA_FILE)) {
     await fs.writeJSON(DATA_FILE, {
@@ -54,10 +50,8 @@ async function initData() {
     })
   }
   
-  // 下载图片
   if (!await fs.pathExists(IMAGE_FILE)) {
     try {
-      console.log('[sakisaki] 正在下载游戏图片...')
       const response = await axios.get(IMAGE_URL, { responseType: 'stream' })
       const writer = fs.createWriteStream(IMAGE_FILE)
       response.data.pipe(writer)
@@ -65,23 +59,19 @@ async function initData() {
         writer.on('finish', resolve)
         writer.on('error', reject)
       })
-      console.log('[sakisaki] 游戏图片下载完成')
     } catch (error) {
       console.error('[sakisaki] 下载图片失败:', error)
     }
   }
 }
 
-// 香草小祥追击游戏主功能
 async function sakisakiGame(e) {
   const userId = e.user_id.toString()
   const groupId = e.group_id ? e.group_id.toString() : 'private'
   const now = Date.now()
   
-  // 读取数据
   let data = await fs.readJSON(DATA_FILE)
   
-  // 冷却检查
   const lastTrigger = data.lastTrigger[groupId] || {}
   if (lastTrigger[userId] && now - lastTrigger[userId] < 3000) {
     const cd = Math.ceil((3000 - (now - lastTrigger[userId])) / 1000)
@@ -89,15 +79,12 @@ async function sakisakiGame(e) {
     return true
   }
   
-  // 更新触发时间
   if (!data.lastTrigger[groupId]) data.lastTrigger[groupId] = {}
   data.lastTrigger[groupId][userId] = now
   
-  // 游戏概率
   const successProb = 0.25
   const isSuccess = Math.random() < successProb
   
-  // 更新玩家数据
   if (!data.players[userId]) {
     data.players[userId] = {
       userId: userId,
@@ -128,7 +115,6 @@ async function sakisakiGame(e) {
       `📈 成功率：${((player.success / player.total) * 100).toFixed(1)}%`
     ].join('\n')
     
-    // 发送成功图片
     if (await fs.pathExists(IMAGE_FILE)) {
       try {
         await e.reply(segment.image(IMAGE_FILE))
@@ -149,14 +135,11 @@ async function sakisakiGame(e) {
              `\n📊 当前成功率：${((player.success / player.total) * 100).toFixed(1)}%`
   }
   
-  // 保存数据
   await fs.writeJSON(DATA_FILE, data)
-  
   e.reply(message)
   return true
 }
 
-// 排行榜功能
 async function sakisakiRank(e) {
   try {
     const data = await fs.readJSON(DATA_FILE)
@@ -167,7 +150,6 @@ async function sakisakiRank(e) {
       return true
     }
     
-    // 按成功次数排序
     players.sort((a, b) => b.success - a.success)
     
     const topPlayers = players.slice(0, 10)
@@ -201,7 +183,6 @@ async function sakisakiRank(e) {
   return true
 }
 
-// 清除排行榜
 async function clearRank(e) {
   try {
     const data = {
@@ -221,7 +202,6 @@ async function clearRank(e) {
   return true
 }
 
-// 游戏帮助
 async function gameHelp(e) {
   const helpText = [
     '🎮 香草小祥追击游戏帮助',
@@ -250,18 +230,14 @@ async function gameHelp(e) {
   return true
 }
 
-// 工具函数
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-// 初始化
 await initData()
 
-// Yunzai Bot插件导出
 export { plugin as default }
 
-// 兼容旧版本Yunzai的导出方式
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = plugin
 }
