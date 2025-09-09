@@ -3,6 +3,7 @@ import { plugin } from '@lib/plugins/plugin.js'
 import fs from 'fs-extra'
 import axios from 'axios'
 import path from 'path'
+import { segment } from 'oicq'
 
 // 定义插件类（必须继承plugin，否则Bot无法监听指令）
 export class SakisakiGame extends plugin {
@@ -11,23 +12,23 @@ export class SakisakiGame extends plugin {
       name: '香草小祥追击',
       dsc: '香草小祥追击游戏',
       event: 'message',
-      priority: 5,
+      priority: 5000,
       rule: [
         {
-          reg: '^saki$|^小祥$',
+          reg: '^[/#]?saki$|^[/#]?小祥$',
           fnc: 'startGame'
         },
         {
-          reg: '^saki排行$|^小祥排行$',
+          reg: '^[/#]?saki排行$|^[/#]?小祥排行$',
           fnc: 'showRanking'
         },
         {
-          reg: '^saki清除排行$',
+          reg: '^[/#]?saki清除排行$',
           fnc: 'clearRanking',
           permission: 'master'
         },
         {
-          reg: '^#小祥帮助$',
+          reg: '^[/#]?小祥帮助$',
           fnc: 'showHelp'
         }
       ]
@@ -67,15 +68,17 @@ export class SakisakiGame extends plugin {
       return
     }
     this.cdMap.set(userId, now)
-
+  
     if (!this.gameData.users[userId]) {
       this.gameData.users[userId] = { success: 0, total: 0 }
     }
-
+  
     const userData = this.gameData.users[userId]
     userData.total++
     this.gameData.global.totalTimes++
-
+  
+    const nickname = this.e.sender.card || this.e.sender.nickname || this.e.user_id
+  
     if (Math.random() < this.successProb) {
       userData.success++
       this.gameData.global.successTimes++
@@ -84,7 +87,7 @@ export class SakisakiGame extends plugin {
       
       const successRate = ((userData.success / userData.total) * 100).toFixed(1)
       const msg = [
-        `🎉 恭喜 ${this.e.sender.card || this.e.user_id} 成功追上了香草小祥！`,
+        `🎉 恭喜 ${nickname} 成功追上了香草小祥！`,
         `📊 总追击次数：${userData.total} 次`,
         `🏆 成功次数：${userData.success} 次`,
         `📈 成功率：${successRate}%`
@@ -93,7 +96,7 @@ export class SakisakiGame extends plugin {
       this.e.reply(msg)
       this.e.reply(segment.image(this.imgFile))
     } else {
-      this.e.reply(`💨 ${this.e.sender.card || this.e.user_id} 没能追上香草小祥...再试一次吧！`)
+      this.e.reply(`💨 ${nickname} 没能追上香草小祥...再试一次吧！`)
     }
     
     this.saveGameData()
@@ -101,33 +104,37 @@ export class SakisakiGame extends plugin {
 
   async showRanking() {
     const users = Object.entries(this.gameData.users)
-      .map(([qq, data]) => ({ qq, ...data }))
+      .map(([qq, data]) => ({ 
+        qq, 
+        ...data, 
+        nickname: this.e.group?.pickMember?.(qq)?.card || this.e.group?.pickMember?.(qq)?.nickname || qq 
+      }))
       .sort((a, b) => b.success - a.success)
       .slice(0, 10)
-
+  
     if (users.length === 0) {
       this.e.reply('还没有人玩过游戏呢～快来成为第一个吧！')
       return
     }
-
+  
     let msg = '🏆 香草小祥追击排行榜\n'
     msg += '═══════════════════════\n'
-
+  
     users.forEach((user, index) => {
       const medal = ['🥇', '🥈', '🥉'][index] || '  '
       const successRate = ((user.success / user.total) * 100).toFixed(1)
-      msg += `${medal} ${user.qq}\n`
+      msg += `${medal} ${user.nickname}\n`
       msg += `   成功: ${user.success}次 | 总计: ${user.total}次 | 成功率: ${successRate}%\n`
     })
-
+  
     const globalSuccessRate = this.gameData.global.totalTimes > 0 
       ? ((this.gameData.global.successTimes / this.gameData.global.totalTimes) * 100).toFixed(1)
       : 0
-
+  
     msg += `\n📊 总游戏次数: ${this.gameData.global.totalTimes}\n`
     msg += `🎯 总成功次数: ${this.gameData.global.successTimes}\n`
     msg += `📈 整体成功率: ${globalSuccessRate}%`
-
+  
     this.e.reply(msg)
   }
 
