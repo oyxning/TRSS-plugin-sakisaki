@@ -1,0 +1,23 @@
+{
+  "name": "sakisaki-game-plugin",
+  "version": "1.6.0",
+  "description": "香草小祥追击游戏插件 - TRSS-Yunzai移植版",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "yunzai",
+    "bot",
+    "plugin",
+    "trss",
+    "game",
+    "sakisaki"
+  ],
+  "author": "sakisaki",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "fs-extra": "^11.0.0"
+  }
+}
