@@ -18,17 +18,13 @@
 ### 方法1：直接安装
 ```bash
 cd TRSS-Yunzai/plugins
-git clone https://github.com/oyxning/sakisaki-game-plugin.git
+git clone https://github.com/oyxning/TRSS-plugin-sakisaki.git
 ```
 
 ### 方法2：手动安装
-1. 下载本插件到 `TRSS-Yunzai/plugins/sakisaki-game-plugin`
-2. 安装依赖：
-```bash
-cd sakisaki-game-plugin
-npm install
-```
-3. 重启TRSS-Yunzai
+1. 下载本插件到 `TRSS-Yunzai/plugins/` 目录
+2. 运行 `npm install` 安装依赖
+3. 重启 TRSS-Yunzai
 
 ## 🎲 使用说明
 
