@@ -174,7 +174,7 @@ export class SakisakiGame extends plugin {
     if (fs.existsSync(this.imgFile)) return
     
     try {
-      const imageUrl = 'https://gitee.com/yhArcadia/Yunzai-Bot-plugins-index/raw/main/img/sjp.jpg'
+      const imageUrl = 'https://raw.githubusercontent.com/oyxning/astrbot_plugin_sakisaki/refs/heads/master/sjp.jpg'
       const response = await axios.get(imageUrl, { responseType: 'stream' })
       const writer = fs.createWriteStream(this.imgFile)
       response.data.pipe(writer)
